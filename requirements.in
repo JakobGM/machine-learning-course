@@ -1,0 +1,14 @@
+# Better python REPL
+ipython
+
+# Interactive notebook environment
+jupyterlab
+
+# Extensions for jupyterlab
+ipywidgets
+
+# Progress bar utility
+ipypb
+
+# Numerical library
+numpy
