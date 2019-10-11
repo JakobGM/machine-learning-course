@@ -35,7 +35,7 @@ class DataSet:
         train = train.set_index("ID_code")
         test = test.set_index("ID_code")
         self.unlabeled_test = xy(X=test, y=None)
-        self.all_train = xy(X=train.iloc[:, 2:], y=train["target"])
+        self.all_train = xy(X=train.iloc[:, 1:], y=train["target"])
 
         assert sum(train_val_test_split) == 1.0
         self.train_val_test_split = train_val_test_split
