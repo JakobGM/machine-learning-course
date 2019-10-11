@@ -1,11 +1,11 @@
 from collections import namedtuple
 from typing import Tuple
 
-from IPyothon.display import Markdown, display
+from IPython.display import Markdown, display
 
 from matplotlib import pyplot as plt
 
-import nump as np
+import numpy as np
 
 import pandas as pd
 
