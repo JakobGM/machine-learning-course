@@ -11,6 +11,9 @@ import pandas as pd
 
 from sklearn.metrics import (
     accuracy_score,
+    auc,
+    balanced_accuracy_score,
+    precision_recall_curve,
     roc_auc_score,
     roc_curve,
 )
@@ -82,7 +85,7 @@ class DataSet:
             train_val_test_split=train_val_test_split,
         )
 
-    def evaluate(self, prediction, cutoff=0.5, plot_roc=False):
+    def evaluate(self, prediction, cutoff=0.5, plot_roc=True):
         assert len(prediction) == len(self.test_split.y)
         display(Markdown("### Evaluation Report"))
 
@@ -100,10 +103,18 @@ class DataSet:
             display(Markdown(
                 "**WARNING:** Prediction probabilities set to {0, 1}",
             ))
-
+            
         y_true = self.test_split.y
+        prc_precision, prc_recall, prc_thresholds = precision_recall_curve(
+            y_true=y_true,
+            probas_pred=prediction,
+            pos_label=1,
+        )
+        prc_auc = auc(prc_recall, prc_precision)
+        display(Markdown(f"__PRC AUC Score:__ {prc_auc:.5f}"))
+
         auc_score = roc_auc_score(y_true=y_true, y_score=prediction)
-        display(Markdown(f"__AUC Score:__ {auc_score:.5f}"))
+        display(Markdown(f"__ROC AUC Score:__ {auc_score:.5f}\n"))
 
         y_pred = (prediction > cutoff)
         accuracy = accuracy_score(
@@ -114,6 +125,14 @@ class DataSet:
             f"\n_Following statistics calculated with cut-off = {cutoff}_"
         ))
         display(Markdown(f"__Accuracy:__ {accuracy * 100:.2f}%"))
+        
+        balanced_accuracy = balanced_accuracy_score(
+            y_true=y_true,
+            y_pred=y_pred,
+        )
+        display(Markdown(
+            f"__Balanced Accuracy:__ {balanced_accuracy * 100:.2f}%\n",
+        ))
 
         tp = int(np.logical_and(y_pred == 1, y_true == 1).sum())
         tn = int(np.logical_and(y_pred == 0, y_true == 0).sum())
@@ -127,10 +146,10 @@ class DataSet:
         display(Markdown(f"__Specificity:__ {specificity * 100:.2f}%"))
 
         precision = tp / (tp + fp)
-        display(Markdown(f"__Precision:__ {precision * 100:.2f}%"))
+        display(Markdown(f"__Class 1 Precision:__ {precision * 100:.2f}%"))
 
         recall = tp / (tp + fn)
-        display(Markdown(f"__Recall:__ {recall * 100:.2f}%"))
+        display(Markdown(f"__Class 1 Recall:__ {recall * 100:.2f}%"))
 
         confusion_matrix = pd.DataFrame(
             data=[[tp, fp], [fn, tn]],
@@ -145,15 +164,35 @@ class DataSet:
                 y_score=prediction,
                 pos_label=1,
             )
-            plt.title("Receiver Operating Characteristic")
-            plt.plot(fpr, tpr, "b", label=f"AUC = {auc_score:0.2f}")
-            plt.plot([0, 1], [0, 1], "r--", label="Random Guesser")
-            plt.legend(loc="lower right")
-            plt.xlim([0, 1])
-            plt.ylim([0, 1])
-            plt.ylabel("True Positive Rate")
-            plt.xlabel("False Positive Rate")
-            plt.show()
+            fig, (ax1, ax2) = plt.subplots(
+                1, 2,
+                figsize=(15, 7.5),
+                sharex=True,
+                sharey=True,
+            )
+            ax1.plot(fpr, tpr, "b", label=f"ROC AUC = {auc_score:0.2f}")
+            ax1.plot([0, 1], [0, 1], "r--", label="Random Guesser")
+            ax1.legend(loc="lower right")
+            ax1.set_title("Receiver Operating Characteristic (ROC)")
+            ax1.set_xlim([0, 1])
+            ax1.set_ylim([0, 1])
+            ax1.set_xlabel("False Positive Rate")
+            ax1.set_ylabel("True Positive Rate")
+            ax1.set_aspect(1)
+            
+            ax2.plot(
+                prc_recall,
+                prc_precision,
+                label=f"PRC AUC = {prc_auc:0.2f}",
+            )
+            ax2.plot([0, 1], [1, 0], "r--", label="Random Guesser")
+            ax2.legend(loc="lower right")
+            ax2.set_title("Precision Recall Curve (PRC)")
+            ax2.set_xlim([0, 1])
+            ax2.set_ylim([0, 1])
+            ax2.set_xlabel("Recall")
+            ax2.set_ylabel("Precision")
+            ax2.set_aspect(1)
 
     def summary(self) -> str:
         text = ["### DataSet summary"]
