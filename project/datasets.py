@@ -92,6 +92,14 @@ class DataSet:
             prediction = prediction["target"].to_numpy()
         elif not_numpy:
             prediction = prediction.to_numpy()
+            
+        if prediction.ndim == 2 and np.isclose(prediction.sum(axis=1), 1).all():
+            prediction = prediction[:, 1]
+            
+        if np.isin(prediction, (0, 1)).all():
+            display(Markdown(
+                "**WARNING:** Prediction probabilities set to {0, 1}",
+            ))
 
         y_true = self.test_split.y
         auc_score = roc_auc_score(y_true=y_true, y_score=prediction)
