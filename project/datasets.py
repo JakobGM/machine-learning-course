@@ -95,15 +95,15 @@ class DataSet:
             prediction = prediction["target"].to_numpy()
         elif not_numpy:
             prediction = prediction.to_numpy()
-            
+
         if prediction.ndim == 2 and np.isclose(prediction.sum(axis=1), 1).all():
             prediction = prediction[:, 1]
-            
+
         if np.isin(prediction, (0, 1)).all():
             display(Markdown(
                 "**WARNING:** Prediction probabilities set to {0, 1}",
             ))
-            
+
         y_true = self.test_split.y
         prc_precision, prc_recall, prc_thresholds = precision_recall_curve(
             y_true=y_true,
@@ -125,7 +125,7 @@ class DataSet:
             f"\n_Following statistics calculated with cut-off = {cutoff}_"
         ))
         display(Markdown(f"__Accuracy:__ {accuracy * 100:.2f}%"))
-        
+
         balanced_accuracy = balanced_accuracy_score(
             y_true=y_true,
             y_pred=y_pred,
@@ -139,16 +139,16 @@ class DataSet:
         fp = int(np.logical_and(y_pred == 1, y_true == 0).sum())
         fn = int(np.logical_and(y_pred == 0, y_true == 1).sum())
 
-        sensitivity = tp / (tp + fn)
+        sensitivity = 0 if not (tp + fn) else tp / (tp + fn)
         display(Markdown(f"__Sensitivity:__ {sensitivity * 100:.2f}%"))
 
-        specificity = tn / (tn + fp)
+        specificity = 0 if not (tn + fp) else tn / (tn + fp)
         display(Markdown(f"__Specificity:__ {specificity * 100:.2f}%"))
 
-        precision = tp / (tp + fp)
+        precision = 0 if not (tp + fp) else tp / (tp + fp)
         display(Markdown(f"__Class 1 Precision:__ {precision * 100:.2f}%"))
 
-        recall = tp / (tp + fn)
+        recall = 0 if not (tp + fn) else tp / (tp + fn)
         display(Markdown(f"__Class 1 Recall:__ {recall * 100:.2f}%"))
 
         confusion_matrix = pd.DataFrame(
@@ -179,7 +179,7 @@ class DataSet:
             ax1.set_xlabel("False Positive Rate")
             ax1.set_ylabel("True Positive Rate")
             ax1.set_aspect(1)
-            
+
             ax2.plot(
                 prc_recall,
                 prc_precision,
