@@ -13,23 +13,19 @@ def categorical_feature(args):
         if unique_in_train:
             unique_in_test = row in test_rows
             if unique_in_test:
-                new_column.append(
-                    "totally_unique"
-                )
+                new_column.append(4)
             else:
-                new_column.append(
-                    "train_unique"
-                )
+                new_column.append(3)
             continue
         targets = train_targets[matches]
         contains_zeros = 0 in targets
         contains_ones = 1 in targets
         if contains_zeros and contains_ones:
-            new_column.append("mixed_target")
+            new_column.append(2)
         elif contains_zeros:
-            new_column.append("zero_target")
+            new_column.append(0)
         elif contains_ones:
-            new_column.append("one_target")
+            new_column.append(1)
         else:
             raise RuntimeError("Should never reach this point!")
 
@@ -37,13 +33,7 @@ def categorical_feature(args):
         feature_name + "_categorical",
         pd.Categorical(
             new_column,
-            categories=[
-                "totally_unique",
-                "train_unique",
-                "mixed_target",
-                "zero_target",
-                "one_target",
-            ],
+            categories=[0, 1, 2, 3, 4],
             ordered=False,
         ),
     )
