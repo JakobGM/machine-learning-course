@@ -32,10 +32,15 @@ class DataSet:
     ) -> None:
         self._original_train = train
         self._original_test = test
-        train = train.set_index("ID_code")
-        test = test.set_index("ID_code")
+        if train.index.name != "ID_code":
+            train = train.set_index("ID_code")
+        if test.index.name != "ID_code":
+            test = test.set_index("ID_code")
         self.unlabeled_test = xy(X=test, y=None)
-        self.all_train = xy(X=train.iloc[:, 1:], y=train["target"])
+        self.all_train = xy(
+            X=train.drop(columns=["target"]),
+            y=train["target"],
+        )
 
         assert sum(train_val_test_split) == 1.0
         self.train_val_test_split = train_val_test_split
