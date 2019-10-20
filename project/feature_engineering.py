@@ -26,9 +26,6 @@ def categorical_feature(args):
                 new_column.append(3)
             continue
 
-        if is_train:
-            matches[index] = True
-
         targets = train_targets[matches]
         contains_zeros = 0 in targets
         contains_ones = 1 in targets
