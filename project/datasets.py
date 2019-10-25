@@ -231,12 +231,12 @@ class DataSet:
 
 
 def get_datasets():
-    train_large = pd.read_csv("data/train.csv")
-    test_large = pd.read_csv("data/test.csv")
+    train_large = pd.read_csv("train.csv")
+    test_large = pd.read_csv("test.csv")
 
-    test_small = pd.read_csv("data/test_small.csv")
+    test_small = pd.read_csv("test_small.csv")
     train_small = pd.read_csv(
-        "data/train_small.csv",
+        "train_small.csv",
         names=train_large.columns,
         header=None,
         index_col=False,
